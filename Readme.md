@@ -1,0 +1,2 @@
+-Instalar Node.js del siguiente link: https://nodejs.org/en/download/prebuilt-installer
+-Correr el proyecto con el siguiente comando en cmd en la raiz del proyecto -> node index.js

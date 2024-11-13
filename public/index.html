@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo de Enlaces</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Monitoreo de Enlaces</h1>
+    <input type="text" id="ip-input" placeholder="Introduce la IP">
+    <button onclick="addIP()">Añadir IP</button>
+    <div id="ip-list"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        function addIP() {
+            const ip = document.getElementById('ip-input').value;
+            fetch('/add-ip', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ip })
+            }).then(response => response.json())
+              .then(data => alert(data.message))
+              .catch(error => console.error('Error:', error));
+        }
+        socket.on('ipStatus', ({ ip, isAlive, activeTime, inactiveTime }) => {
+            let ipElement = document.getElementById(`ip-${ip}`);
+            if (!ipElement) {
+                ipElement = document.createElement('div');
+                ipElement.className = 'ip-status';
+                ipElement.id = `ip-${ip}`;
+                ipElement.innerHTML = `
+                    <div class="status-button" id="status-${ip}"></div>
+                    <span>${ip}</span>
+                    <span id="time-${ip}" class="time-text"></span>
+                `;
+                document.getElementById('ip-list').appendChild(ipElement);
+            }
+
+            const statusButton = document.getElementById(`status-${ip}`);
+            const timeText = document.getElementById(`time-${ip}`);
+
+            statusButton.className = `status-button ${isAlive ? 'active' : 'inactive'}`;
+            timeText.textContent = isAlive 
+                ? `Tiempo activo: ${activeTime} s` 
+                : `Tiempo inactivo: ${inactiveTime} s`;
+        });
+    </script>
+</body>
+</html>
